@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: security_concept
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/security?createDatabaseIfNotExist=true
+    username: root
+    password: admin
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  sql:
+    init:
+      mode: always
