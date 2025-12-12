@@ -10,47 +10,46 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final String SECRET = "my_super_secret_key_12345678901234567890"; // should be 32+ chars
-    private final long EXPIRATION = 1000 * 60 * 30; // 30 mins
+    private final String SECRET = "THIS_IS_A_256_BIT_SECRET_KEY_FOR_JWT_SECURITY_DEMO_123456";
+    private final long EXPIRATION = 30_000; // 1 hour
 
-    private Key getSigningKey() {
+    private Key getSignKey() {
         return Keys.hmacShaKeyFor(SECRET.getBytes());
     }
 
     public String generateToken(String username, String role) {
-
         return Jwts.builder()
                 .setSubject(username)
                 .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
+    public boolean isTokenValid(String token) {
+        Jwts.parserBuilder()
+                .setSigningKey(getSignKey())
+                .build()
+                .parseClaimsJws(token);
+        return true;
+    }
+
     public String extractUsername(String token) {
-        return getClaims(token).getSubject();
+        return Jwts.parserBuilder()
+                .setSigningKey(getSignKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
     public String extractRole(String token) {
-        return (String) getClaims(token).get("role");
-    }
-
-    public boolean isTokenValid(String token) {
-        try {
-            getClaims(token);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private Claims getClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+        return (String) Jwts.parserBuilder()
+                .setSigningKey(getSignKey())
                 .build()
                 .parseClaimsJws(token)
-                .getBody();
+                .getBody()
+                .get("role");
     }
 }
-    
